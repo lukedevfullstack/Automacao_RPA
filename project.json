@@ -1,0 +1,7 @@
+{
+  "name": "Projeto_Cotacoes_BCB_UiPath",
+  "description": "Automação para consulta de cotações no site do Banco Central",
+  "main": "Main.xaml",
+  "dependencies": {},
+  "schemaVersion": "4.0"
+}

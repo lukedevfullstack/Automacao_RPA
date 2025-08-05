@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Activity x:Class="Main" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation"
+ xmlns:ui="http://schemas.uipath.com/workflow/activities"
+ xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib"
+ xmlns:sys="clr-namespace:System;assembly=mscorlib"
+ mc:Ignorable="sap">
+
+  <Sequence DisplayName="Main">
+    <ui:OpenBrowser DisplayName="Open BCB Website" Url="https://www.bcb.gov.br" BrowserType="Chrome" Private="True" Result="{x:Reference browser}">
+      <ui:OpenBrowser.Body>
+        <ActivityAction>
+          <ActivityAction.Argument>
+            <DelegateInArgument x:TypeArguments="UiPath.Core.Browser" Name="browser"/>
+          </ActivityAction.Argument>
+          <Sequence>
+            <ui:GetText DisplayName="Get USD Value" Result="[usdValue]" Selector="&lt;webctrl aaname='Dólar EUA' tag='TD' /&gt;" />
+            <ui:GetText DisplayName="Get EUR Value" Result="[eurValue]" Selector="&lt;webctrl aaname='Euro' tag='TD' /&gt;" />
+          </Sequence>
+        </ActivityAction>
+      </ui:OpenBrowser.Body>
+    </ui:OpenBrowser>
+
+    <Assign DisplayName="Get DateTime" To="[currentTime]" Value="[Now.ToString(&quot;dd/MM/yyyy HH:mm&quot;)]" />
+
+    <Assign DisplayName="Build PDF Text" To="[pdfContent]" Value="[&quot;Cotações de Moedas - Consulta Automática&quot; & vbCrLf & vbCrLf & _
+    &quot;Data e Hora da Consulta: &quot; & currentTime & vbCrLf & vbCrLf & _
+    &quot;Cotação do Dólar (USD): &quot; & usdValue & vbCrLf & _
+    &quot;Cotação do Euro (EUR): &quot; & eurValue & vbCrLf & vbCrLf & _
+    &quot;(Arquivo gerado automaticamente via UiPath)&quot;]" />
+
+    <WriteTextFile DisplayName="Write Temp File" FileName="cotacao_temp.txt" Text="[pdfContent]" Encoding="UTF-8" />
+
+    <ui:InvokeWorkflowFile DisplayName="Convert TXT to PDF" WorkflowFile="GeneratePDF.xaml" />
+
+    <!--
+    <SendSMTPMailMessage DisplayName="Send Email"
+                         To="destinatario@email.com"
+                         Subject="Cotações do Dólar e Euro"
+                         Body="Segue em anexo o PDF com as cotações."
+                         Attachments="{""cotacao.pdf""}"
+                         Port="587"
+                         Host="smtp.seuprovedor.com"
+                         UserName="seu@email.com"
+                         Password="senha_segura"
+                         IsBodyHtml="False" />
+    -->
+
+  </Sequence>
+</Activity>
